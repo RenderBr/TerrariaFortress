@@ -1,6 +1,6 @@
 # Terraria Fortress
 
-Support me & this plugin's (along with several others) development on Ko.Fi (https://ko-fi.com/averageterraria)[Boop]
+Support me & this plugin's (along with several others) development on Ko.Fi: [Here!](https://ko-fi.com/averageterraria)
 
 # **REQUIREMENTS**
 These are required by this plugin to function correctly.
