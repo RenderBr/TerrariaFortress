@@ -9,6 +9,7 @@ using TShockAPI;
 using TerrariaFortress;
 using TShockAPI.Hooks;
 using Terraria.Localization;
+using System.Threading.Tasks;
 
 namespace TerrariaFortress
 {
@@ -41,6 +42,8 @@ namespace TerrariaFortress
         public static List<Team> Teams = new List<Team>();
         public static List<TFPlayer> players = new List<TFPlayer>();
         public Config Config { get; private set; }
+        public int MatchTime;
+        public string firstBlood = "";
         /// <summary>
         /// The plugin's constructor
         /// Set your plugin's order (optional) and any other constructor logic here
@@ -59,6 +62,7 @@ namespace TerrariaFortress
             ServerApi.Hooks.NetGreetPlayer.Register(this, PlayerJoin);
             ServerApi.Hooks.GameInitialize.Register(this, WorldLoaded);
             GeneralHooks.ReloadEvent += Reload;
+            GetDataHandlers.KillMe += PlayerKilled;
             PlayerHooks.PlayerChat += Chat;
             RegionHooks.RegionEntered += Spawned;
 
@@ -73,6 +77,11 @@ namespace TerrariaFortress
         public void Reload(ReloadEventArgs args)
         {
             Config = Config.Read();
+            MatchTime = Config.matchTime * 60; // convert to minutes
+        }
+
+        public void PlayerKilled(object sender, GetDataHandlers.KillMeEventArgs args)
+        {
         }
 
         public void Spawned(RegionHooks.RegionEnteredEventArgs args)
@@ -226,6 +235,9 @@ namespace TerrariaFortress
 
                 }
 
+                Player.TPlayer.statLifeMax = kit.health;
+                NetMessage.SendData((int)PacketTypes.PlayerHp, -1, -1, new NetworkText(Player.TPlayer.statLifeMax.ToString(), NetworkText.Mode.Literal), Player.Index, kit.health, kit.health);
+
                 Player.TPlayer.armor[0] = TShock.Utils.GetItemById(kit.armor[0]);
                 NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.armor[0].Name, NetworkText.Mode.Literal), Player.Index, PlayerItemSlotID.Armor0, 0);
 
@@ -253,6 +265,7 @@ namespace TerrariaFortress
         private void WorldLoaded(EventArgs args)
         {
             Config = Config.Read();
+            MatchTime = Config.matchTime * 60; // convert to minutes
             Team BlueTeam = new Team("BLU");
             BlueTeam.spawnPoint = Config.blueSpawnPoint;
             Team RedTeam = new Team("RED");
@@ -269,6 +282,7 @@ namespace TerrariaFortress
             if(TFp.Team.team == "none")
             {
                 args.TShockFormattedText = args.TShockFormattedText;
+                args.TShockFormattedText = args.TShockFormattedText;
 
             }
             Console.WriteLine(TFp.Team.team);
@@ -282,6 +296,14 @@ namespace TerrariaFortress
             }
         }
 
+        private void ChatWhiteSpace(int amount)
+        {
+            for(int i = 0; i< amount; i++)
+            {
+                TSPlayer.All.SendMessage("", Color.White);
+            }
+        }
+
         private void PlayerJoin(GreetPlayerEventArgs args)
         {
             TSPlayer Player = TShock.Players[args.Who];
@@ -290,10 +312,28 @@ namespace TerrariaFortress
             Player.TPlayer.Spawn_SetPosition((int)Config.spawnPosition.X, (int)Config.spawnPosition.Y);
             players.Add(tfp);
             AskPlayerJoinTeam(Player);
+
+            Player.TPlayer.statLifeMax = 1;
+            NetMessage.SendData((int)PacketTypes.PlayerHp, -1, -1, new NetworkText(Player.TPlayer.statLifeMax.ToString(), NetworkText.Mode.Literal), Player.Index, 1, 1);
+
+
             for (var i = 0; i < Player.TPlayer.inventory.Length; i++)
             {
                 Player.TPlayer.inventory[i].TurnToAir();
                 NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.inventory[i].Name, NetworkText.Mode.Literal), Player.Index, i, 0);
+            }
+            for(var i = 0; i < Player.TPlayer.miscEquips.Length; i++)
+            {
+                Player.TPlayer.miscEquips[i].TurnToAir();
+                NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.miscEquips[i].Name, NetworkText.Mode.Literal), Player.Index, (int)ItemSlot.EquipmentSlot1+i, 0);
+
+            }
+
+
+            if (TShock.Players.Length >= Config.playerCountToStart)
+            {
+                ChatWhiteSpace(5);
+                StartMatch();
             }
         }
 
@@ -391,6 +431,72 @@ namespace TerrariaFortress
             EquipmentSlot1, EquipmentSlot2, EquipmentSlot3, EquipmentSlot4, EquipmentSlot5,
             DyeEquipmentSlot1, DyeEquipmentSlot2, DyeEquipmentSlot3, DyeEquipmentSlot4, DyeEquipmentSlot5
         };
+        #endregion
+
+        #region utilities
+       private async void StartMatch()
+        {
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is starting in... 5", Color.OrangeRed);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is starting in... 4", Color.DarkOrange);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is starting in... 3", Color.Orange);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is starting in... 2", Color.Yellow);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is starting in... 1", Color.LightYellow);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The match has started!", Color.LightGreen);
+            await Task.Delay(1000);
+            MatchBegin();
+        }
+
+        private async void MatchBegin()
+        {
+            foreach(TFPlayer player in TeamManager.Blue().TFPlayers)
+            {
+                player.TSPlayer.Teleport(Config.blueSpawnPoint.X*16, Config.blueSpawnPoint.Y*16);
+                player.TSPlayer.SendMessage("You have been teleported to your team base!", Color.BlueViolet);
+            }
+            foreach (TFPlayer player in TeamManager.Red().TFPlayers)
+            {
+                player.TSPlayer.Teleport(Config.redSpawnPoint.X*16, Config.redSpawnPoint.Y*16);
+                player.TSPlayer.SendMessage("You have been teleported to your team base!", Color.IndianRed);
+            }
+            gameStarted = true;
+            firstBlood = "";
+
+            await Task.Delay((Config.matchTime * 1000 * 60)-1*1000*60);
+            MatchEnd();
+        }
+
+        private async void MatchEnd()
+        {
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game will end in... 1 minute", Color.OrangeRed);
+            await Task.Delay(1000*60);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is ending in... 5", Color.DarkOrange);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is ending in... 4", Color.Orange);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is ending in... 3", Color.Yellow);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is ending in... 2", Color.LightYellow);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is ending in... 1", Color.LightYellow);
+            await Task.Delay(1000);
+            TSPlayer.All.SendMessage($"[{Config.gameModeName}] The match has ended!", Color.LightGreen);
+            await Task.Delay(1000);
+            gameStarted = false;
+            firstBlood = "";
+            if(TShock.Players.Length >= Config.playerCountToStart)
+            {
+                TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game will be restarting shortly!", Color.LightGreen);
+                await Task.Delay(5000);
+                StartMatch();
+            }
+
+        }
+
         #endregion
         /// <summary>
         /// Performs plugin cleanup logic

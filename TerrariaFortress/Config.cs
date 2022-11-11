@@ -14,6 +14,10 @@ namespace TerrariaFortress
 
 		public List<Kit> kits;
 
+		public int matchTime; //minutes
+
+		public int playerCountToStart;
+
 		public Vector2 blueSpawnPoint;
 
 		public Vector2 redSpawnPoint;

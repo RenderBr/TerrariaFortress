@@ -8,6 +8,8 @@ namespace TerrariaFortress
     {
         public string name { get; set; }
 
+        public int health { get; set; }
+
         public List<Tuple<int, int>> items { get; set; }
     
         public List<int> accessories { get; set; }
