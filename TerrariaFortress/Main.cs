@@ -88,16 +88,22 @@ namespace TerrariaFortress
             if(tF.Team == TeamManager.Blue())
             {
                 Player.Teleport((int)Config.blueSpawnPoint.X*16, (int)Config.blueSpawnPoint.Y*16);
+                Player.SetPvP(true);
+                Player.SetTeam(3);
+
                 return;
             }
             if (tF.Team == TeamManager.Red())
             {
                 Player.Teleport((int)Config.redSpawnPoint.X * 16, (int)Config.redSpawnPoint.Y * 16);
+                Player.SetPvP(true);
+                Player.SetTeam(1);
                 return;
             }
             if (tF.Team.team == "none")
             {
                 Player.Teleport((int)Config.spawnPosition.X * 16, (int)Config.spawnPosition.Y * 16);
+                Player.SetPvP(false);
                 return;
             }
 
@@ -304,6 +310,8 @@ namespace TerrariaFortress
             TeamManager.Blue().TFPlayers.Add(tFPlayer);
             Player.TPlayer.ChangeSpawn((int)Config.blueSpawnPoint.X, (int)Config.blueSpawnPoint.Y);
             Player.Teleport((int)Config.blueSpawnPoint.X * 16, (int)Config.blueSpawnPoint.Y * 16);
+            Player.SetPvP(true);
+            Player.SetTeam(3);
             Player.SendMessage($"[{Config.gameModeName}] You are now in the blue team!", Color.LightBlue);
 
             if (tFPlayer.Team.Equals(TeamManager.Blue()))
@@ -337,6 +345,8 @@ namespace TerrariaFortress
             TeamManager.Red().TFPlayers.Add(tFPlayer);
             Player.TPlayer.ChangeSpawn((int)Config.redSpawnPoint.X, (int)Config.redSpawnPoint.Y);
             Player.Teleport((int)Config.redSpawnPoint.X * 16, (int)Config.redSpawnPoint.Y * 16);
+            Player.SetPvP(true);
+            Player.SetTeam(1);
             Player.SendMessage($"[{Config.gameModeName}] You are now in the red team!", Color.IndianRed);
 
             if (tFPlayer.Team.Equals(TeamManager.Blue()))
