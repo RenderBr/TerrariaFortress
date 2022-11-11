@@ -5,6 +5,7 @@ Support me & this plugin's (along with several others) development on Ko.Fi: [He
 # **REQUIREMENTS**
 These are required by this plugin to function correctly.
 - SSC enabled! **Initial startup kit should be DELETED**
+- Do not set pvp-mode to always, the plugin will handle this for you.
 - An entire server for this to work on. (so either a dimensions setup, where this is a seperate server or... just run a standalone server for this? lolol)
 - A world that would make sense for a gamemode like this... include two team spawn points (red and blue themed), a lobby (in the sky), a battlegrounds, 
 - TShock V5, duh...
