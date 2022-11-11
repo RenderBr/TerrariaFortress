@@ -41,7 +41,7 @@ namespace TerrariaFortress
         public bool gameStarted = false;
         public static List<Team> Teams = new List<Team>();
         public static List<TFPlayer> players = new List<TFPlayer>();
-        public Config Config { get; private set; }
+        public static Config Config { get; private set; }
         public int MatchTime;
         public string firstBlood = "";
         /// <summary>
@@ -82,15 +82,33 @@ namespace TerrariaFortress
 
         public void PlayerKilled(object sender, GetDataHandlers.KillMeEventArgs args)
         {
+            short id = args.PlayerId;
+            TSPlayer enemyPlayer  = TShock.Players[args.PlayerDeathReason._sourcePlayerIndex];
+
+            if(enemyPlayer == null)
+            {
+                return;
+            }
+
+            TFPlayer.GetByUsername(enemyPlayer.Name).killCount++;
+
+            if(gameStarted == true && firstBlood == "")
+            {
+                TSPlayer.All.SendMessage($"{enemyPlayer.Name} has drawn first blood!", Color.OrangeRed);
+            }
 
         }
 
         public void Spawned(RegionHooks.RegionEnteredEventArgs args)
         {
+            Leaderboard.Initialize();
             TSPlayer Player = args.Player;
             TFPlayer tF = TFPlayer.GetByUsername(Player.Name);
 
-            if(args.Region.Name != Config.sorterRegionName || args.Region.Name != Config.border1 || args.Region.Name != Config.border2)
+            if(args.Region.Name == Config.sorterRegionName || args.Region.Name == Config.border1 || args.Region.Name == Config.border2)
+            {
+
+            }else
             {
                 return;
             }
@@ -219,6 +237,7 @@ namespace TerrariaFortress
             if (kits.Find(x => x.name == Char).name == Char)
             {
                 var kit = kits.Find(x => x.name == Char);
+                tfP.selectedCharacter = kit.name;
                 foreach(Tuple<int,int> item in kit.items)
                 {
                     if(TShock.Utils.GetItemById(item.Item1).FitsAmmoSlot() == true)

@@ -10,9 +10,13 @@ namespace TerrariaFortress
     {
 
         public TSPlayer TSPlayer { get; set; } 
-        public string Name { get; set; }     
+        public string Name { get; set; }   
+        
+        public int killCount { get; set; }
 
         public Team Team { get; set; }
+
+        public string selectedCharacter { get; set; }
 
         public static TFPlayer GetByUsername(string name)
         {
