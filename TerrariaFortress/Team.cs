@@ -13,6 +13,8 @@ namespace TerrariaFortress
 
         public Vector2 spawnPoint;
 
+        public int score;
+
         public Team(string team)
         {
             this.team = team;

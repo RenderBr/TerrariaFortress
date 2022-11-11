@@ -42,8 +42,10 @@ namespace TerrariaFortress
         public static List<Team> Teams = new List<Team>();
         public static List<TFPlayer> players = new List<TFPlayer>();
         public static Config Config { get; private set; }
-        public int MatchTime;
+        public static int MatchTime;
         public string firstBlood = "";
+        public static Timer _delayTimer;
+        public static DateTime startTime;
         /// <summary>
         /// The plugin's constructor
         /// Set your plugin's order (optional) and any other constructor logic here
@@ -84,13 +86,14 @@ namespace TerrariaFortress
         {
             short id = args.PlayerId;
             TSPlayer enemyPlayer  = TShock.Players[args.PlayerDeathReason._sourcePlayerIndex];
-
+            TSPlayer.FindByNameOrID("" + id)[0].Spawn(PlayerSpawnContext.ReviveFromDeath);
             if(enemyPlayer == null)
             {
                 return;
             }
 
             TFPlayer.GetByUsername(enemyPlayer.Name).killCount++;
+            TFPlayer.GetByUsername(enemyPlayer.Name).Team.score++;
 
             if(gameStarted == true && firstBlood == "")
             {
@@ -101,7 +104,6 @@ namespace TerrariaFortress
 
         public void Spawned(RegionHooks.RegionEnteredEventArgs args)
         {
-            Leaderboard.Initialize();
             TSPlayer Player = args.Player;
             TFPlayer tF = TFPlayer.GetByUsername(Player.Name);
 
@@ -327,6 +329,7 @@ namespace TerrariaFortress
 
         private void PlayerJoin(GreetPlayerEventArgs args)
         {
+            Leaderboard.Initialize();
             TSPlayer.Server.SetTime(true, 27000.0);
             TSPlayer Player = TShock.Players[args.Who];
             TFPlayer tfp = new TFPlayer(Player);
@@ -339,11 +342,12 @@ namespace TerrariaFortress
             NetMessage.SendData((int)PacketTypes.PlayerHp, -1, -1, new NetworkText(Player.TPlayer.statLifeMax.ToString(), NetworkText.Mode.Literal), Player.Index, 1, 1);
 
 
-            for (var i = 69; i < 3; i++)
+            for (var i = 69; i < 72; i++)
             {
                 Player.TPlayer.inventory[i].TurnToAir();
                 NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.inventory[i].Name, NetworkText.Mode.Literal), Player.Index, i, 0);
             }
+
             for (var i = 0; i < Player.TPlayer.inventory.Length; i++)
             {
                 Player.TPlayer.inventory[i].TurnToAir();
@@ -478,6 +482,18 @@ namespace TerrariaFortress
             MatchBegin();
         }
 
+        public static void delay(int Time_delay)
+        {
+            int i = 0;
+            //  ameTir = new System.Timers.Timer();
+            _delayTimer = new Timer();
+            _delayTimer.Interval = Time_delay;
+            _delayTimer.AutoReset = false; //so that it only calls the method once
+            _delayTimer.Elapsed += (s, args) => i = 1;
+            _delayTimer.Start();
+            while (i == 0) { };
+        }
+
         private async void MatchBegin()
         {
             foreach(TFPlayer player in TeamManager.Blue().TFPlayers)
@@ -492,8 +508,8 @@ namespace TerrariaFortress
             }
             gameStarted = true;
             firstBlood = "";
-
-            await Task.Delay((Config.matchTime * 1000 * 60)-1*1000*60);
+            startTime = DateTime.Now;
+            delay(Config.matchTime * 1000 * 60);
             MatchEnd();
         }
 
