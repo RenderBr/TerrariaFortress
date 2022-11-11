@@ -1,5 +1,5 @@
 # Terraria Fortress
-
+**Plugin progress to completion: 15%** **ETA: Late-November? We'll see
 Support me & this plugin's (along with several others) development on Ko.Fi: [Here!](https://ko-fi.com/averageterraria)
 
 # **REQUIREMENTS**
