@@ -82,6 +82,7 @@ namespace TerrariaFortress
 
         public void PlayerKilled(object sender, GetDataHandlers.KillMeEventArgs args)
         {
+
         }
 
         public void Spawned(RegionHooks.RegionEnteredEventArgs args)
@@ -89,7 +90,7 @@ namespace TerrariaFortress
             TSPlayer Player = args.Player;
             TFPlayer tF = TFPlayer.GetByUsername(Player.Name);
 
-            if(args.Region.Name != Config.sorterRegionName)
+            if(args.Region.Name != Config.sorterRegionName || args.Region.Name != Config.border1 || args.Region.Name != Config.border2)
             {
                 return;
             }
@@ -272,6 +273,7 @@ namespace TerrariaFortress
             RedTeam.spawnPoint = Config.redSpawnPoint;
             Teams.Add(BlueTeam);
             Teams.Add(RedTeam);
+            TShock.Config.Settings.DefaultMaximumSpawns = 0;
             Console.WriteLine(Config.kits[0].name);
         }
 
@@ -306,6 +308,7 @@ namespace TerrariaFortress
 
         private void PlayerJoin(GreetPlayerEventArgs args)
         {
+            TSPlayer.Server.SetTime(true, 27000.0);
             TSPlayer Player = TShock.Players[args.Who];
             TFPlayer tfp = new TFPlayer(Player);
             tfp.Team = new Team("none");
@@ -317,12 +320,17 @@ namespace TerrariaFortress
             NetMessage.SendData((int)PacketTypes.PlayerHp, -1, -1, new NetworkText(Player.TPlayer.statLifeMax.ToString(), NetworkText.Mode.Literal), Player.Index, 1, 1);
 
 
+            for (var i = 69; i < 3; i++)
+            {
+                Player.TPlayer.inventory[i].TurnToAir();
+                NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.inventory[i].Name, NetworkText.Mode.Literal), Player.Index, i, 0);
+            }
             for (var i = 0; i < Player.TPlayer.inventory.Length; i++)
             {
                 Player.TPlayer.inventory[i].TurnToAir();
                 NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.inventory[i].Name, NetworkText.Mode.Literal), Player.Index, i, 0);
             }
-            for(var i = 0; i < Player.TPlayer.miscEquips.Length; i++)
+            for (var i = 0; i < Player.TPlayer.miscEquips.Length; i++)
             {
                 Player.TPlayer.miscEquips[i].TurnToAir();
                 NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.miscEquips[i].Name, NetworkText.Mode.Literal), Player.Index, (int)ItemSlot.EquipmentSlot1+i, 0);
@@ -330,9 +338,9 @@ namespace TerrariaFortress
             }
 
 
-            if (TShock.Players.Length >= Config.playerCountToStart)
+            if (TShock.Players.Length >= Config.playerCountToStart && gameStarted == false)
             {
-                ChatWhiteSpace(5);
+                ChatWhiteSpace(10);
                 StartMatch();
             }
         }

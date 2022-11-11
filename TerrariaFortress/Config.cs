@@ -25,6 +25,8 @@ namespace TerrariaFortress
 		public Vector2 spawnPosition;
 
 		public string sorterRegionName = "sorter";
+		public string border1 = "b1";
+		public string border2 = "b2";
 
         public void Write()
 		{
