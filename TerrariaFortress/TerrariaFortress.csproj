@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Platforms>AnyCPU;x64</Platforms>
@@ -17,26 +17,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta2" />
+    <PackageReference Include="OTAPI.Upcoming" Version="3.1.19" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.Data.Sqlite">
-      <HintPath>J:\Downloads\TShock-5.0.0-for-Terraria-1.4.4.7-win-x64-Release\bin\Microsoft.Data.Sqlite.dll</HintPath>
-    </Reference>
-    <Reference Include="ModFramework">
-      <HintPath>J:\Downloads\TShock-5.0.0-for-Terraria-1.4.4.7-win-x64-Release\bin\ModFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="OTAPI">
-      <HintPath>J:\Downloads\TShock-5.0.0-for-Terraria-1.4.4.7-win-x64-Release\bin\OTAPI.dll</HintPath>
-    </Reference>
-    <Reference Include="TerrariaServer">
-      <HintPath>J:\Downloads\TShock-5.0.0-for-Terraria-1.4.4.7-win-x64-Release\bin\TerrariaServer.dll</HintPath>
-    </Reference>
-    <Reference Include="TShockAPI">
-      <HintPath>J:\Downloads\TShock-5.0.0-for-Terraria-1.4.4.7-win-x64-Release\ServerPlugins\TShockAPI.dll</HintPath>
-    </Reference>
+    <PackageReference Include="TSAPI" Version="5.1.2" />
+    <PackageReference Include="TShock" Version="5.1.2" />
   </ItemGroup>
 </Project>

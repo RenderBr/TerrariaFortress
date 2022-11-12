@@ -269,6 +269,11 @@ namespace TerrariaFortress
 
                 }
 
+                foreach(int buff in kit.buffs)
+                {
+                    Player.SetBuff(buff, 18000, true);
+                }
+
                 Player.TPlayer.statLifeMax = kit.health;
                 NetMessage.SendData((int)PacketTypes.PlayerHp, -1, -1, new NetworkText(Player.TPlayer.statLifeMax.ToString(), NetworkText.Mode.Literal), Player.Index, kit.health, kit.health);
 
@@ -365,12 +370,9 @@ namespace TerrariaFortress
                 Player.TPlayer.inventory[i].TurnToAir();
                 NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.inventory[i].Name, NetworkText.Mode.Literal), Player.Index, i, 0);
             }
-            for (var i = 0; i < Player.TPlayer.miscEquips.Length; i++)
-            {
-                Player.TPlayer.miscEquips[i].TurnToAir();
-                NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.miscEquips[i].Name, NetworkText.Mode.Literal), Player.Index, (int)ItemSlot.EquipmentSlot1+i, 0);
 
-            }
+            clearMiscEquips(Player);
+            
 
 
             if (TShock.Players.Length >= Config.playerCountToStart && gameStarted == false)
@@ -379,6 +381,7 @@ namespace TerrariaFortress
                 StartMatch();
             }
         }
+
 
         public void KitsAdmin(CommandArgs args)
         {
@@ -525,6 +528,17 @@ namespace TerrariaFortress
             MatchEnd();
         }
 
+        public void clearMiscEquips(TSPlayer player)
+        {
+
+            for (var i = 89; i > 93; i++)
+            {
+                player.TPlayer.inventory[i].TurnToAir();
+                NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(player.TPlayer.inventory[i].Name, NetworkText.Mode.Literal), player.Index, i, 0);
+
+            }
+
+        }
         private async void MatchEnd()
         {
             TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game will end in... 1 minute", Color.OrangeRed);
