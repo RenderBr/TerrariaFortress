@@ -43,9 +43,12 @@ namespace TerrariaFortress
 				if (File.Exists(filepath))
 				{
 					config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(filepath));
+                }
+                else
+                {
+					File.WriteAllText(filepath, JsonConvert.SerializeObject(config, Formatting.Indented));
 				}
 
-				File.WriteAllText(filepath, JsonConvert.SerializeObject(config, Formatting.Indented));
 				return config;
 			}
 			catch (Exception ex)

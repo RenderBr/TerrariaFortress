@@ -16,6 +16,8 @@ namespace TerrariaFortress
 
         public List<int> armor { get; set; }
     
+        public List<int> buffs { get; set; }
+
         public Kit(string name, List<Tuple<int, int>> items, List<int> accessories, List<int> armor)
         {
             this.name = name;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Terraria;
 using TerrariaApi.Server;
@@ -62,6 +63,7 @@ namespace TerrariaFortress
         public override void Initialize()
         {
             ServerApi.Hooks.NetGreetPlayer.Register(this, PlayerJoin);
+            ServerApi.Hooks.ServerLeave.Register(this, PlayerLeave);
             ServerApi.Hooks.GameInitialize.Register(this, WorldLoaded);
             GeneralHooks.ReloadEvent += Reload;
             GetDataHandlers.KillMe += PlayerKilled;
@@ -74,6 +76,16 @@ namespace TerrariaFortress
             Commands.ChatCommands.Add(new Command("tf.manager", setSpawn, "ss"));
 
 
+        }
+
+        private void PlayerLeave(LeaveEventArgs args)
+        {
+            players.Remove(TFPlayer.GetByUsername(TShock.Players[args.Who].Name));
+            if(TShock.Players.Count() < Config.playerCountToStart)
+            {
+                gameStarted = false;
+                _delayTimer.Stop();
+            }
         }
 
         public void Reload(ReloadEventArgs args)
