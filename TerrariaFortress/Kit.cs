@@ -10,7 +10,7 @@ namespace TerrariaFortress
 
         public int health { get; set; }
 
-        public List<Tuple<int, int>> items { get; set; }
+        public List<Item> items { get; set; }
     
         public List<int> accessories { get; set; }
 
@@ -18,7 +18,7 @@ namespace TerrariaFortress
     
         public List<int> buffs { get; set; }
 
-        public Kit(string name, List<Tuple<int, int>> items, List<int> accessories, List<int> armor)
+        public Kit(string name, List<Item> items, List<int> accessories, List<int> armor)
         {
             this.name = name;
             this.items = items;

@@ -39,6 +39,13 @@ namespace TerrariaFortress
                 winner = "Winning Team: Tied!";
                 winScore = TeamManager.Red().score;
 
+            TerrariaFortress.Main.MatchTimeLeft = (TerrariaFortress.Main.MatchTime - (int)Math.Round((DateTime.Now.Subtract(Main.startTime).TotalSeconds)));
+
+            if(Main.MatchTimeLeft >= 0)
+            {
+                Main.MatchEnd();
+            }
+
             string message = ($"{RepeatLineBreaks(10)} [c/2596be:[{gameModeName}][c/2596be:]] \r\n Players: {Main.players.Count} \r\n {winner} ({winScore}) \r\n Time Elapsed: {(int)Math.Round((DateTime.Now.Subtract(Main.startTime).TotalSeconds))} seconds {RepeatLineBreaks(59)}");
 
             TSPlayer.All.SendData(PacketTypes.Status, message, 0);

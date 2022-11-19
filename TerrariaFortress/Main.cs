@@ -11,6 +11,7 @@ using TerrariaFortress;
 using TShockAPI.Hooks;
 using Terraria.Localization;
 using System.Threading.Tasks;
+using NuGet.Versioning;
 
 namespace TerrariaFortress
 {
@@ -39,12 +40,13 @@ namespace TerrariaFortress
         /// A short, one-line, description of the plugin's purpose.
         /// </summary>
         public override string Description => "Average's TerrariaFortress base plugin";
-        public bool gameStarted = false;
+        public static bool gameStarted = false;
         public static List<Team> Teams = new List<Team>();
         public static List<TFPlayer> players = new List<TFPlayer>();
         public static Config Config { get; private set; }
         public static int MatchTime;
-        public string firstBlood = "";
+        public static int MatchTimeLeft;
+        public static string firstBlood = "";
         public static Timer _delayTimer;
         public static DateTime startTime;
         /// <summary>
@@ -252,19 +254,20 @@ namespace TerrariaFortress
             {
                 var kit = kits.Find(x => x.name == Char);
                 tfP.selectedCharacter = kit.name;
-                foreach(Tuple<int,int> item in kit.items)
+                foreach(Item item in kit.items)
                 {
-                    if(TShock.Utils.GetItemById(item.Item1).FitsAmmoSlot() == true)
+                    if(TShock.Utils.GetItemById(item.type).FitsAmmoSlot() == true)
                     {
-                        var Item = TShock.Utils.GetItemById(item.Item1);
-                        Item.stack = item.Item2;
+                        var Item = TShock.Utils.GetItemById(item.type);
+                        Item.stack = item.stack;
+                        Item.prefix = (byte)item.prefix;
                         Player.TPlayer.inventory[(int)ItemSlot.AmmoSlot1] = Item;
                         NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, new NetworkText(Player.TPlayer.inventory[(int)ItemSlot.AmmoSlot1].Name, NetworkText.Mode.Literal), Player.Index, (int)ItemSlot.AmmoSlot1, 0);
 
                     }
                     else
                     {
-                        Player.GiveItem(item.Item1, item.Item2);
+                        Player.GiveItem(item.type, item.stack, item.prefix);
                     }
 
                 }
@@ -349,6 +352,12 @@ namespace TerrariaFortress
             Leaderboard.Initialize();
             TSPlayer.Server.SetTime(true, 27000.0);
             TSPlayer Player = TShock.Players[args.Who];
+
+            if(Player.IsLoggedIn == true)
+            {
+                Player.tempGroup = TShock.Groups.FirstOrDefault(x => x.Name == "Player");
+            }
+
             TFPlayer tfp = new TFPlayer(Player);
             tfp.Team = new Team("none");
             Player.TPlayer.Spawn_SetPosition((int)Config.spawnPosition.X, (int)Config.spawnPosition.Y);
@@ -480,7 +489,7 @@ namespace TerrariaFortress
         #endregion
 
         #region utilities
-       private async void StartMatch()
+       private static async void StartMatch()
         {
             TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game is starting in... 5", Color.OrangeRed);
             await Task.Delay(1000);
@@ -509,7 +518,7 @@ namespace TerrariaFortress
             while (i == 0) { };
         }
 
-        private async void MatchBegin()
+        private static void MatchBegin()
         {
             foreach(TFPlayer player in TeamManager.Blue().TFPlayers)
             {
@@ -524,8 +533,6 @@ namespace TerrariaFortress
             gameStarted = true;
             firstBlood = "";
             startTime = DateTime.Now;
-            delay(Config.matchTime * 1000 * 60);
-            MatchEnd();
         }
 
         public void clearMiscEquips(TSPlayer player)
@@ -539,7 +546,7 @@ namespace TerrariaFortress
             }
 
         }
-        private async void MatchEnd()
+        public static async void MatchEnd()
         {
             TSPlayer.All.SendMessage($"[{Config.gameModeName}] The game will end in... 1 minute", Color.OrangeRed);
             await Task.Delay(1000*60);
