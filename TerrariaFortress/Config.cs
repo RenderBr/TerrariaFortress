@@ -5,6 +5,7 @@ using System.IO;
 using TShockAPI;
 using Newtonsoft.Json;
 using Microsoft.Xna.Framework;
+using TShockAPI.DB;
 
 namespace TerrariaFortress
 {
@@ -25,15 +26,28 @@ namespace TerrariaFortress
 		public Vector2 spawnPosition;
 
 		public string sorterRegionName = "sorter";
+
+		public List<Region> controlPoints = new List<Region> { };
+
 		public string border1 = "b1";
 		public string border2 = "b2";
 
-        public void Write()
+        public void AddControlPoint(Region region)
 		{
 			string path = Path.Combine(TShock.SavePath, "TerrariaFortress.json");
-			File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
+			var config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(path));
+
+			config.controlPoints.Add(region);
+			File.WriteAllText(path, JsonConvert.SerializeObject(config, Formatting.Indented));
 		}
-		public static Config Read()
+
+        public void Write()
+        {
+            string path = Path.Combine(TShock.SavePath, "TerrariaFortress.json");
+
+            File.WriteAllText(path, JsonConvert.SerializeObject(Main.Config, Formatting.Indented));
+        }
+        public static Config Read()
 		{
 			string filepath = Path.Combine(TShock.SavePath, "TerrariaFortress.json");
 			try
@@ -43,6 +57,10 @@ namespace TerrariaFortress
 				if (File.Exists(filepath))
 				{
 					config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(filepath));
+					foreach(ControlPoint cp in config.controlPoints)
+					{
+						Main.controlPoints.Add(cp);
+					}
                 }
                 else
                 {

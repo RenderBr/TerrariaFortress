@@ -12,6 +12,7 @@ using TShockAPI.Hooks;
 using Terraria.Localization;
 using System.Threading.Tasks;
 using NuGet.Versioning;
+using TShockAPI.DB;
 
 namespace TerrariaFortress
 {
@@ -49,6 +50,7 @@ namespace TerrariaFortress
         public static string firstBlood = "";
         public static Timer _delayTimer;
         public static DateTime startTime;
+        public static List<ControlPoint> controlPoints = new List<ControlPoint>();
         /// <summary>
         /// The plugin's constructor
         /// Set your plugin's order (optional) and any other constructor logic here
@@ -121,38 +123,81 @@ namespace TerrariaFortress
             TSPlayer Player = args.Player;
             TFPlayer tF = TFPlayer.GetByUsername(Player.Name);
 
-            if(args.Region.Name == Config.sorterRegionName || args.Region.Name == Config.border1 || args.Region.Name == Config.border2)
+            #region sorter or borders
+            if (args.Region.Name == Config.sorterRegionName || args.Region.Name == Config.border1 || args.Region.Name == Config.border2)
             {
+                if (tF.Team == TeamManager.Blue())
+                {
+                    Player.Teleport((int)Config.blueSpawnPoint.X * 16, (int)Config.blueSpawnPoint.Y * 16);
+                    Player.SetPvP(true);
+                    Player.SetTeam(3);
 
-            }else
+                    return;
+                }
+                if (tF.Team == TeamManager.Red())
+                {
+                    Player.Teleport((int)Config.redSpawnPoint.X * 16, (int)Config.redSpawnPoint.Y * 16);
+                    Player.SetPvP(true);
+                    Player.SetTeam(1);
+                    return;
+                }
+                if (tF.Team.team == "none")
+                {
+                    Player.Teleport((int)Config.spawnPosition.X * 16, (int)Config.spawnPosition.Y * 16);
+                    Player.SetPvP(false);
+                    return;
+                }
+
+            }
+            #endregion
+
+            #region control point
+            if (controlPoints.Any(x=>x.Name==args.Region.Name))
+            {
+                //average too lazy he work on this more later 
+            }
+            #endregion
+        }
+
+        public void AddControlPoint(CommandArgs e)
+        {
+            TSPlayer ex = e.Player;
+
+            if(e.Parameters.Count == 0)
+            {
+                ex.SendErrorMessage("Please enter a region name to add as a control point!");
+                return;
+            }
+
+            string region;
+            if(e.Parameters.Count == 1)
+            {
+                region = e.Parameters[0].ToString();
+
+                if (TShock.Regions.Regions.Any(x => x.Name == region))
+                {
+                    Region r = TShock.Regions.Regions.First(x=>x.Name== region);
+
+                    Config.controlPoints.Add(r);
+                    Config.AddControlPoint(r);
+                    ex.SendSuccessMessage($"You have successfully added the region {region} as a control point!");
+                }
+                else
+                {
+                    ex.SendErrorMessage("Please enter a VALID region name! We could not find this region.");
+                    return;
+                }
+            }
+            else
             {
                 return;
             }
 
-            if(tF.Team == TeamManager.Blue())
-            {
-                Player.Teleport((int)Config.blueSpawnPoint.X*16, (int)Config.blueSpawnPoint.Y*16);
-                Player.SetPvP(true);
-                Player.SetTeam(3);
+            
 
-                return;
-            }
-            if (tF.Team == TeamManager.Red())
-            {
-                Player.Teleport((int)Config.redSpawnPoint.X * 16, (int)Config.redSpawnPoint.Y * 16);
-                Player.SetPvP(true);
-                Player.SetTeam(1);
-                return;
-            }
-            if (tF.Team.team == "none")
-            {
-                Player.Teleport((int)Config.spawnPosition.X * 16, (int)Config.spawnPosition.Y * 16);
-                Player.SetPvP(false);
-                return;
-            }
 
         }
-        
+
         public void setSpawn(CommandArgs args)
         {
             TSPlayer Player = args.Player;
