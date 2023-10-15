@@ -1,3 +1,6 @@
+# THIS PROJECT IS ARCHIVED
+I have no intentions of continuing this plugin as the codebase is garbage. Sorry!
+
 # Terraria Fortress
 Support me & this plugin's (along with several others) development on Ko.Fi: [Here!](https://ko-fi.com/averageterraria)
 
